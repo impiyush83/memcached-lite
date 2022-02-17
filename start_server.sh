@@ -1,4 +1,4 @@
 
 #!/bin/sh
 
-touch memcache.csv && python3 server/server-impl.py
+touch memcache.csv && python3 server/server-impl.py $1

@@ -1,8 +1,6 @@
 import socket
 import uuid
-
-SERVER_PORT = 7001
-HOST = '127.0.0.1'
+import sys
 
 
 class Client:
@@ -11,9 +9,11 @@ class Client:
     SET = "SET"
     GET = "GET"
 
-    def __init__(self):
+    def __init__(self, port):
+        hostname = socket.gethostname()
+        host = socket.gethostbyname(hostname)
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._socket.connect((HOST, SERVER_PORT))
+        self._socket.connect((host, port))
         self._identifier = uuid.uuid4()
 
     def run(self):
@@ -26,14 +26,13 @@ class Client:
                 break
 
             action = client_input.strip().lower().split()
-
-            if action[0].upper() == Client.SET and len(action) == 4:
+            if action[0].upper() == Client.SET == len(action) == 4:
                 value = input().split()
                 data = ' '.join(action + value)
-                self._socket.sendall(data.encode())
-            elif action[0].upper() == Client.GET and len(action) == 3:
+                self._socket.sendall(data.encode('utf-8'))
+            elif action[0].upper() == Client.GET and len(action) == 2:
                 data = ' '.join(action)
-                self._socket.sendall(data.encode())
+                self._socket.sendall(data.encode('utf-8'))
             elif action[0].upper() == Client.END:
                 print(f'Client  {self._identifier}: Connection Closed')
                 break
@@ -45,9 +44,13 @@ class Client:
                       f'2. set <key> <length-of-value> \\r\\n \n'
                       f'  <value> \\r\\n  \n '
                       f'3. get <key> \\r\\n')
+                continue
             print(f'Client  {self._identifier}: Waiting for server to send')
+
             data = self._socket.recv(Client.MAX_BYTES)
-            print(f'Client {self._identifier}: Data from server {data.decode()}')
+            data = data.decode('utf-8')
+            print(f'Client {self._identifier}: Data from '
+                  f'server {data}')
 
         print(f' Client  {self._identifier} : Socket closing')
         self._socket.close()
@@ -59,7 +62,7 @@ class Client:
 
 if __name__ == '__main__':
     try:
-        client = Client()
+        client = Client(int(sys.argv[1]))
         client.run()
         client.stop()
     except Exception as e:

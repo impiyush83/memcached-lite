@@ -1,17 +1,13 @@
 import socket
 import csv
 from _thread import *
-from pathlib import Path
+import sys
 
-
-INVALID_COMMAND = 'INVALID-COMMAND\r\n'
-INVALID_KEY = 'INVALID-KEY\r\n'
-NOT_FOUND = 'NOT-FOUND\r\n'
+ERROR = 'ERROR\r\n'
+NOT_FOUND = 'NOT_FOUND\r\n'
 END = 'END\r\n'
-NOT_STORED = 'NOT-STORED\r\n'
+NOT_STORED = 'NOT_STORED\r\n'
 STORED = 'STORED\r\n'
-
-SERVER_PORT = 7001
 
 
 class Server:
@@ -64,15 +60,15 @@ class Server:
             print(f'Server: Inside a thread for client {client}')
             while True:
                 data = client.recv(1024)
-                command = data.decode()
+                command = data.decode('utf-8')
                 msg = (command.lower()).split()
                 if len(msg) == 0:
                     break
                 reply = self.command_executor(msg)
                 if reply == 'END\r\n':
                     break
-                print(f'Server: Data recieved from client {data}')
-                client.send(reply.encode())
+                print(f'Server: Data recieved from client {command}')
+                client.send(reply.encode('utf-8'))
             if self._connections > 0:
                 self._connections -= 1
             print(f'Server: Closing a thread for client {client}')
@@ -81,10 +77,13 @@ class Server:
 
     def command_executor(self, msg):
         def handle_set(self, command):
-            if len(msg) < 6:
-                return INVALID_COMMAND
+            if len(msg) != 4:
+                return ERROR
 
-            key, length, value = command[1], command[2], command[4]
+            key, length, value = command[1], command[2], command[3]
+
+            if len(key) > 250:
+                return ERROR
 
             if len(value) != int(length):
                 return NOT_STORED
@@ -97,14 +96,19 @@ class Server:
             return STORED
 
         def handle_get(self, command):
-            if len(command) != 3:
-                return INVALID_COMMAND
+            if len(command) != 2:
+                return ERROR
 
             key = command[1]
 
             if self._memcache_kv.get(key):
-                    return 'VALUE' + ' ' + key + ' ' + \
-                           self._memcache_kv.get(key) + ' ' + END
+                    return ' '.join([
+                        'VALUE',
+                        key,
+                        str(len(self._memcache_kv.get(key)))+'\r\n',
+                        self._memcache_kv.get(key),
+                        END+'\r\n'
+                    ])
             return NOT_FOUND
 
         def handle_end(self, command):
@@ -120,7 +124,10 @@ class Server:
 
 if __name__ == '__main__':
     try:
-        server = Server('127.0.0.1', SERVER_PORT)
+        hostname = socket.gethostname()
+        host = socket.gethostbyname(hostname)
+        print(f'Server: host is {host}')
+        server = Server(host, int(sys.argv[1]))
         server.bootloader()
         server.run()
         server.stop()

@@ -10,14 +10,13 @@ The main task is to implement a server, that stores and retrieves data for diffe
     ```  
     Bytes represent length of value
     
-    set <key> <bytes> \r\n
-    <value> \r\n
+    set <key> <bytes>\r\n <value>\r\n
 
     Responses:
     
     STORED\r\n  - If successfully stored 
     NOT-STORED\r\n - If an error occurs while storing data
-    INVALID-COMMAND\r\n - If any invalid command is entered
+    ERROR\r\n - error
     ```
     
     
@@ -26,7 +25,7 @@ The main task is to implement a server, that stores and retrieves data for diffe
     ```  
     Bytes represent length of value
     
-    get <key> \r\n
+    get <key>\r\n
 
     Responses:
     
