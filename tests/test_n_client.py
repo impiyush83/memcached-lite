@@ -28,7 +28,7 @@ class TestMultipleClient(unittest.TestCase):
             sock1.sendall(f'get multiple{i}'.encode('utf-8'))
             data1 = sock1.recv(1024)
             assert data1.decode('utf-8') \
-                == f'VALUE multiple{i} 1\r\n {i+1} END\r\n\r\n'
+                == f'VALUE multiple{i} 1\r\n {i+1}\r\n END\r\n'
 
 
 if __name__ == '__main__':

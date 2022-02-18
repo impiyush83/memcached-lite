@@ -109,8 +109,8 @@ class Server:
                         'VALUE',
                         key,
                         str(len(self._memcache_kv.get(key)))+'\r\n',
-                        self._memcache_kv.get(key),
-                        END+'\r\n'
+                        self._memcache_kv.get(key)+'\r\n',
+                        END
                     ])
             return NOT_FOUND
 
