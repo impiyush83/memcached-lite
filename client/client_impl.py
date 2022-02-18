@@ -26,11 +26,12 @@ class Client:
                 break
 
             action = client_input.strip().lower().split()
-            if action[0].upper() == Client.SET == len(action) == 4:
+
+            if action[0].upper() == Client.SET:
                 value = input().split()
                 data = ' '.join(action + value)
                 self._socket.sendall(data.encode('utf-8'))
-            elif action[0].upper() == Client.GET and len(action) == 2:
+            elif action[0].upper() == Client.GET:
                 data = ' '.join(action)
                 self._socket.sendall(data.encode('utf-8'))
             elif action[0].upper() == Client.END:
@@ -50,7 +51,7 @@ class Client:
             data = self._socket.recv(Client.MAX_BYTES)
             data = data.decode('utf-8')
             print(f'Client {self._identifier}: Data from '
-                  f'server {data}')
+                  f'server:\n {data}')
 
         print(f' Client  {self._identifier} : Socket closing')
         self._socket.close()
