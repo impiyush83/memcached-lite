@@ -14,7 +14,10 @@ class Server:
     MAX_CONNECTIONS = 1024
     MEMCACHE_FILENAME = 'memcache.csv'
 
-    def __init__(self, host, port):
+    def __init__(self, port):
+        hostname = socket.gethostname()
+        host = socket.gethostbyname(hostname)
+        print(f'Server: host is {host}')
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.bind((host, port))
         print(f'Server: Socket binded to port {port}')
@@ -124,10 +127,7 @@ class Server:
 
 if __name__ == '__main__':
     try:
-        hostname = socket.gethostname()
-        host = socket.gethostbyname(hostname)
-        print(f'Server: host is {host}')
-        server = Server(host, int(sys.argv[1]))
+        server = Server(int(sys.argv[1]))
         server.bootloader()
         server.run()
         server.stop()
